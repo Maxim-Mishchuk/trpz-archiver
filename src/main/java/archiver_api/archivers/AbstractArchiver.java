@@ -21,6 +21,6 @@ public abstract class AbstractArchiver implements IArchiver {
             Files.createDirectory(folderPath);
 
         Path tempArchivePath = Path.of(TEMP_FOLDER, folder, archivePath.getFileName().toString());
-        return Files.copy(archivePath, tempArchivePath, StandardCopyOption.REPLACE_EXISTING);
+        return Files.createFile(tempArchivePath);
     }
 }
