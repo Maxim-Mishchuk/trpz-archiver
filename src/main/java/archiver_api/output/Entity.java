@@ -30,4 +30,8 @@ public record Entity(String name, byte[] bytes) {
     public static Entity create(String name, byte[] bytes) {
         return new Entity(name, bytes);
     }
+
+    public void accept(Visitor v) {
+        v.visit(this);
+    }
 }
