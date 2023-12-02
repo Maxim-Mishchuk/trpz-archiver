@@ -1,5 +1,6 @@
 package example;
 
+import archiver_api.output.ExportVisitor;
 import archiver_api.supported_types.CompressorType;
 import archiver_api.supported_types.ArchiveType;
 import archiver_api.archivers.AbstractArchiver;
@@ -46,11 +47,14 @@ public class Main {
         try {
             initOutputFolder(resources);
 
-            archiver.create(archivePath, createList);
-            archiver.add(archivePath, addList);
-            archiver.add(archivePath, changedList);
-            System.out.println(archiver.read(archivePath));
-            System.out.println(archiver.delete(archivePath, deleteList));
+            archiver.create(archivePath, createList); // Create the new archive
+            archiver.add(archivePath, addList); // Add some files to the existed archive
+            archiver.add(archivePath, changedList); // Add and update some files
+            System.out.println(archiver.read(archivePath)); // Return all archive's entities
+            System.out.println(archiver.delete(archivePath, deleteList)); // Delete some files from the existed archive
+
+            ExportVisitor exportVisitor = new ExportVisitor(Path.of(resources, "output", "export"));
+            exportVisitor.export(archiver.read(archivePath)); // Export all files from the archive using specific path
         } catch (IOException | ArchiveException e) {
             e.printStackTrace();
         }
