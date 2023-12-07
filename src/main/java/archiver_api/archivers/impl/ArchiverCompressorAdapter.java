@@ -13,10 +13,10 @@ import java.nio.file.Path;
 import java.util.List;
 
 public class ArchiverCompressorAdapter extends AbstractArchiver {
-    private final Archiver archiver;
+    private final AbstractArchiver archiver;
     private final Compressor compressor;
 
-    public ArchiverCompressorAdapter(Archiver archiver, Compressor compressor) {
+    public ArchiverCompressorAdapter(AbstractArchiver archiver, Compressor compressor) {
         this.archiver = archiver;
         this.compressor = compressor;
     }

@@ -11,7 +11,7 @@ import archiver_api.compressors.impl.Compressor;
 
 public class BasicArchiverCreator implements ArchiverCreator {
     @Override
-    public Archiver createArchiver(ArchiveType archiveType) {
+    public AbstractArchiver createArchiver(ArchiveType archiveType) {
         return new Archiver(archiveType, new BasicArchiveWriter(), new BasicArchiveReader(), new BasicArchiveDeleter());
     }
 
