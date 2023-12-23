@@ -1,6 +1,7 @@
 package archiver_api.archivers.impl;
 
 import archiver_api.output.Entity;
+import archiver_api.archivers.actionTypes.ArchiveReadingType;
 import archiver_api.supported_types.ArchiveType;
 import archiver_api.actions.delete.ArchiveDeleter;
 import archiver_api.actions.read.ArchiveReader;
@@ -47,6 +48,8 @@ public class Archiver extends AbstractArchiver {
     @Override
     public void add(Path archivePath, List<Path> filePaths) throws IOException, ArchiveException {
         Path tempArchivePath = createTempArchive("archives", archivePath);
+
+        boolean isAdded = false;
         try (
                 BufferedInputStream bis = new BufferedInputStream(Files.newInputStream(archivePath));
                 BufferedOutputStream bos = new BufferedOutputStream(Files.newOutputStream(tempArchivePath));
@@ -57,19 +60,25 @@ public class Archiver extends AbstractArchiver {
 
         ) {
             writer.write(ais, aos, filePaths);
+            isAdded = true;
         } finally {
-            Files.copy(tempArchivePath, archivePath, StandardCopyOption.REPLACE_EXISTING);
+            if (isAdded) {
+                Files.copy(tempArchivePath, archivePath, StandardCopyOption.REPLACE_EXISTING);
+            }
             Files.delete(tempArchivePath);
         }
     }
 
     @Override
-    public List<Entity> read(Path archivePath) throws IOException, ArchiveException {
+    public List<Entity> read(Path archivePath, ArchiveReadingType archiverReadingType) throws IOException, ArchiveException {
         try (
                 BufferedInputStream bis = new BufferedInputStream(Files.newInputStream(archivePath));
                 ArchiveInputStream ais = new ArchiveStreamFactory().createArchiveInputStream(bis)
         ) {
-            return reader.read(ais);
+            return switch (archiverReadingType) {
+                case BASIC -> reader.readBasic(ais);
+                case FULL -> reader.readFull(ais);
+            };
         }
     }
 

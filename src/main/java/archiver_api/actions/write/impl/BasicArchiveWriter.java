@@ -69,8 +69,7 @@ public class BasicArchiveWriter implements ArchiveWriter {
 
     private String cutPathName(Path rootPath, Path filePath) {
         return filePath.toString()
-                .replace(rootPath.getParent().toString(), "")
-                .substring(1);
+                .replace(rootPath.getParent().toString(), "");
     }
 
     private List<Path> getAllFilePathsFromDirectory(Path dir) throws IOException {

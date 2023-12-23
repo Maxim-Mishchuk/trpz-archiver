@@ -3,6 +3,7 @@ package archiver_api.archivers.impl;
 import archiver_api.output.Entity;
 import archiver_api.archivers.AbstractArchiver;
 import archiver_api.compressors.impl.Compressor;
+import archiver_api.archivers.actionTypes.ArchiveReadingType;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.compressors.CompressorException;
 
@@ -50,12 +51,12 @@ public class ArchiverCompressorAdapter extends AbstractArchiver {
     }
 
     @Override
-    public List<Entity> read(Path archivePath) throws IOException, ArchiveException {
+    public List<Entity> read(Path archivePath, ArchiveReadingType archiveReadingType) throws IOException, ArchiveException {
         Path tempPath = createTempArchive("compress", archivePath);
 
         try {
             compressor.decompress(archivePath, tempPath);
-            return archiver.read(tempPath);
+            return archiver.read(tempPath, archiveReadingType);
         } catch (CompressorException e) {
             throw new RuntimeException(e);
         } finally {
