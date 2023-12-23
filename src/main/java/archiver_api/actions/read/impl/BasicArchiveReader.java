@@ -12,12 +12,24 @@ import java.util.List;
 
 public class BasicArchiveReader implements ArchiveReader {
     @Override
-    public List<Entity> read(ArchiveInputStream ais) throws IOException {
+    public List<Entity> readBasic(ArchiveInputStream ais) throws IOException {
         List<Entity> entityList = new LinkedList<>();
 
         ArchiveEntry currentEntry;
         while ((currentEntry = ais.getNextEntry()) != null) {
-            entityList.add(Entity.create(currentEntry.getName(), IOUtils.toByteArray(ais)));
+            entityList.add(Entity.create(currentEntry.getName()));
+        }
+
+        return entityList;
+    }
+
+    @Override
+    public List<Entity> readFull(ArchiveInputStream ais) throws IOException {
+        List<Entity> entityList = new LinkedList<>();
+
+        ArchiveEntry currentEntry;
+        while ((currentEntry = ais.getNextEntry()) != null) {
+            entityList.add(Entity.create(currentEntry.getName(), currentEntry.getLastModifiedDate(), IOUtils.toByteArray(ais)));
         }
 
         return entityList;
