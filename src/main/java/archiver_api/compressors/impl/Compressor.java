@@ -22,9 +22,9 @@ public class Compressor implements ICompressor {
     }
 
     @Override
-    public void compress(Path tarArchive, Path savePath) throws IOException, CompressorException {
+    public void compress(Path archivePath, Path savePath) throws IOException, CompressorException {
         try (
-                BufferedInputStream bis = new BufferedInputStream(Files.newInputStream(tarArchive));
+                BufferedInputStream bis = new BufferedInputStream(Files.newInputStream(archivePath));
                 BufferedOutputStream bos = new BufferedOutputStream(Files.newOutputStream(savePath));
                 CompressorOutputStream cos = new CompressorStreamFactory().createCompressorOutputStream(type.name(), bos)
         ) {
@@ -33,10 +33,10 @@ public class Compressor implements ICompressor {
     }
 
     @Override
-    public void decompress(Path compressedTarArchive, Path savePath) throws IOException, CompressorException {
+    public void decompress(Path archivePath, Path savePath) throws IOException, CompressorException {
         try (
                 BufferedOutputStream bos = new BufferedOutputStream(Files.newOutputStream(savePath));
-                BufferedInputStream bis = new BufferedInputStream(Files.newInputStream(compressedTarArchive));
+                BufferedInputStream bis = new BufferedInputStream(Files.newInputStream(archivePath));
                 CompressorInputStream cis = new CompressorStreamFactory().createCompressorInputStream(type.name(), bis)
         ) {
             IOUtils.copy(cis, bos);

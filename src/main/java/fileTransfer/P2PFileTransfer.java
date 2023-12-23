@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -15,6 +16,7 @@ public class P2PFileTransfer {
     private static final int DEFAULT_PORT = 44305;
     private final FileReceiver fileReceiver = new FileReceiver("received");
     private final FileSender fileSender = new FileSender();
+
     private static class FileSender {
         public void send(String address, Path path) throws IOException {
             try (
@@ -56,8 +58,8 @@ public class P2PFileTransfer {
         }
 
     public Thread start() {
-        logger.info("Client server has been started");
         Thread serverThread = new Thread(() -> {
+            logger.info("Client server has been started");
             while (!Thread.interrupted()) {
                 try {
                     init();
@@ -65,31 +67,27 @@ public class P2PFileTransfer {
                     throw new RuntimeException(e);
                 }
             }
+            logger.info("Client server has been stopped");
         });
         serverThread.start();
         return serverThread;
     }
 
     public void init() throws IOException {
-        try (
-                ServerSocket serverSocket = new ServerSocket(DEFAULT_PORT);
-                Socket client = serverSocket.accept()
-        ) {
-            logger.info("Client server has got a connection");
-            fileReceiver.receive(client);
+        try (ServerSocket serverSocket = new ServerSocket(DEFAULT_PORT)) {
+            logger.info("Client server is waiting for connection");
+            serverSocket.setSoTimeout(15_000);
+            try (Socket client = serverSocket.accept()) {
+                logger.info("Client server has got a connection");
+                fileReceiver.receive(client);
+            } catch (SocketTimeoutException ex) {
+                logger.info("Client server does not get any connection");
+            }
         }
     }
 
-    public Thread send(String address, Path path) {
+    public void send(String address, Path path) throws IOException {
         logger.info("Client send a file " + path.getFileName().toString());
-        Thread sender = new Thread(() -> {
-            try {
-                fileSender.send(address, path);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-        sender.start();
-        return sender;
+        fileSender.send(address, path);
     }
 }

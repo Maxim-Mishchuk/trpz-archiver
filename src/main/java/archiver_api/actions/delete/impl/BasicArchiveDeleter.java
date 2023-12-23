@@ -19,9 +19,7 @@ public class BasicArchiveDeleter implements ArchiveDeleter {
         ArchiveEntry currentEntry;
         while ((currentEntry = ais.getNextEntry()) != null) {
             if (entityNames.contains(currentEntry.getName())) {
-                deletedEntities.add(Entity.create(
-                        currentEntry.getName(), IOUtils.toByteArray(ais)
-                ));
+                deletedEntities.add(Entity.create(currentEntry.getName()));
             } else {
                 aos.putArchiveEntry(currentEntry);
                 IOUtils.copy(ais, aos);

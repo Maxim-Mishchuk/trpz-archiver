@@ -7,5 +7,6 @@ import java.io.IOException;
 import java.util.List;
 
 public interface ArchiveReader {
-    List<Entity> read(ArchiveInputStream ais) throws IOException;
+    List<Entity> readBasic(ArchiveInputStream ais) throws IOException;
+    List<Entity> readFull(ArchiveInputStream ais) throws IOException;
 }

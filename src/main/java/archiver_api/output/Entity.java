@@ -1,9 +1,10 @@
 package archiver_api.output;
 
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Objects;
 
-public record Entity(String name, byte[] bytes) {
+public record Entity(String name, Date lastModifiedDate, byte[] bytes) {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -27,8 +28,12 @@ public record Entity(String name, byte[] bytes) {
                 '}';
     }
 
-    public static Entity create(String name, byte[] bytes) {
-        return new Entity(name, bytes);
+    public static Entity create(String name, Date lastModifiedDate, byte[] bytes) {
+        return new Entity(name, lastModifiedDate, bytes);
+    }
+
+    public static Entity create(String name) {
+        return new Entity(name, null, null);
     }
 
     public void accept(Visitor v) {
