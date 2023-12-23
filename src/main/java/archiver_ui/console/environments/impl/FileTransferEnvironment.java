@@ -29,8 +29,8 @@ public class FileTransferEnvironment extends Environment {
 
     private void send() {
         Map<String, String> res = new FormBuilder(in, out)
-                .addField("Enter ip-address:", "ip", InputPredicates.isCorrectIp, "Incorrect from of ip-address!")
-                .addField("Enter file path:", "filePath", InputPredicates.isExistedFile, "Path is incorrect or file does not exist!")
+                .addField("Enter ip-address: ", "ip", InputPredicates.isCorrectIp, "Incorrect from of ip-address!")
+                .addField("Enter file path: ", "filePath", InputPredicates.isExistedFile, "Path is incorrect or file does not exist!")
                 .build()
                 .execute();
 
