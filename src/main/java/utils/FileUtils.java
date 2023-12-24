@@ -11,6 +11,11 @@ public class FileUtils {
 
         if (Files.exists(path)) {
             String name = FileNameUtils.getBaseName(path);
+
+            while (FileNameUtils.getExtension(name).isBlank()) {
+                name = FileNameUtils.getBaseName(name);
+            }
+
             String extension = FileNameUtils.getExtension(path);
 
             for (int i = 1; Files.exists(path); i++) {
