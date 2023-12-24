@@ -1,7 +1,6 @@
 package archiver_api.output;
 
-import org.apache.commons.compress.utils.FileNameUtils;
-import org.apache.commons.compress.utils.IOUtils;
+import utils.FileUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -29,15 +28,7 @@ public class ExportVisitor implements Visitor {
         Path parentPath = entityPath.getParent();
         try {
             Files.createDirectories(parentPath);
-
-            if (Files.exists(entityPath)) {
-                String name = FileNameUtils.getBaseName(entityPath);
-                String extension = FileNameUtils.getExtension(entityPath);
-
-                for (int i = 1; Files.exists(entityPath); i++) {
-                    entityPath = parentPath.resolve(name + "(" + i + ")" + "." + extension);
-                }
-            }
+            entityPath = FileUtils.getFreePath(entityPath);
 
             try (OutputStream os = Files.newOutputStream(entityPath)) {
                 os.write(entity.bytes());
