@@ -59,6 +59,7 @@ public class P2PFileTransfer {
 
                     String fileName = dis.readUTF();
                     Path filePath = initReceivedFile(dis, receiveDir, fileName);
+                    FileTime lastModifiedTime = FileTime.fromMillis(dis.readLong());
 
                     long fileSize = dis.readLong();
                     byte[] buffer = new byte[4096];
@@ -69,6 +70,7 @@ public class P2PFileTransfer {
                             fileSize -= bytes;
                         }
                     }
+                    Files.setAttribute(filePath, "basic:lastModifiedTime", lastModifiedTime, LinkOption.NOFOLLOW_LINKS);
                     logger.info("Client server successfully saved file " + fileName + ", path: " + filePath.toAbsolutePath());
                 }
         }
@@ -89,11 +91,10 @@ public class P2PFileTransfer {
             filePath = FileUtils.getFreePath(filePath);
 
             FileTime creationTime = FileTime.fromMillis(dis.readLong());
-            FileTime lastModifiedTime = FileTime.fromMillis(dis.readLong());
+
 
             Path result = Files.createFile(filePath);
             Files.setAttribute(filePath, "basic:creationTime", creationTime, LinkOption.NOFOLLOW_LINKS);
-            Files.setAttribute(filePath, "basic:lastModifiedTime", lastModifiedTime, LinkOption.NOFOLLOW_LINKS);
 
             return result;
         }
