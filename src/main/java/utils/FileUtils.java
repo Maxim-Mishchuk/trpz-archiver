@@ -11,12 +11,14 @@ public class FileUtils {
 
         if (Files.exists(path)) {
             String name = FileNameUtils.getBaseName(path);
+            StringBuilder extension = new StringBuilder();
+            extension.insert(0, FileNameUtils.getExtension(path));
 
-            while (FileNameUtils.getExtension(name).isBlank()) {
+            while (!FileNameUtils.getExtension(name).isBlank()) {
+                extension.insert(0, FileNameUtils.getExtension(name) + ".");
                 name = FileNameUtils.getBaseName(name);
             }
 
-            String extension = FileNameUtils.getExtension(path);
 
             for (int i = 1; Files.exists(path); i++) {
                 path = parentPath.resolve(name + "(" + i + ")" + "." + extension);
