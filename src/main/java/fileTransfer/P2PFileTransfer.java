@@ -69,7 +69,7 @@ public class P2PFileTransfer {
                             fileSize -= bytes;
                         }
                     }
-                    logger.info("Client server successfully saved file " + fileName + ", path: " + filePath.getParent().toAbsolutePath());
+                    logger.info("Client server successfully saved file " + fileName + ", path: " + filePath.toAbsolutePath());
                 }
         }
 
