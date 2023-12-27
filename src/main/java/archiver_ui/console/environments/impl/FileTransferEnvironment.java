@@ -24,13 +24,14 @@ public class FileTransferEnvironment extends Environment {
         switch (command) {
             case "send" -> send();
             case "init" -> init();
+            default -> incorrectCommand(command);
         }
     }
 
     private void send() {
         Map<String, String> res = new FormBuilder(in, out)
-                .addField("Enter ip-address: ", "ip", InputPredicates.isCorrectIp, "Incorrect from of ip-address!")
-                .addField("Enter file path: ", "filePath", InputPredicates.isExistedFile, "Path is incorrect or file does not exist!")
+                .addField(resourceManager.getString("ipAddressLabel"), "ip", InputPredicates.isCorrectIp, resourceManager.getString("ipAddressError"))
+                .addField(resourceManager.getString("filePathLabel"), "filePath", InputPredicates.isExistedFile, resourceManager.getString("existedFileError"))
                 .build()
                 .execute();
 
@@ -47,12 +48,12 @@ public class FileTransferEnvironment extends Environment {
     private void init() {
         Thread server = p2pFileTransfer.start();
 
-        out.println("\n----- Press any button to stop the server -----\n");
+        out.println(resourceManager.getString("startStopping"));
         try {
             in.read();
 
             server.interrupt();
-            out.println("\n----- Process of stopping is started -----\n");
+            out.println(resourceManager.getString("processStopping"));
 
             server.join();
         } catch (IOException | InterruptedException e) {

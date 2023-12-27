@@ -4,6 +4,7 @@ import utils.FileUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.attribute.FileTime;
 import java.util.List;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,6 +34,11 @@ public class ExportVisitor implements Visitor {
             try (OutputStream os = Files.newOutputStream(entityPath)) {
                 os.write(entity.bytes());
             }
+
+            Files.setLastModifiedTime(
+                    entityPath,
+                    FileTime.from(entity.lastModifiedDate().toInstant())
+            );
         }
         catch (IOException ex) {
             throw new RuntimeException(ex);

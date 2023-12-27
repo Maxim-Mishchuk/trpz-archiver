@@ -10,10 +10,12 @@ import archiver_api.supported_types.CompressorType;
 import archiver_ui.console.environments.Environment;
 import archiver_ui.console.input.FormBuilder;
 import archiver_ui.console.input.InputPredicates;
+import archiver_ui.utils.ResourceManager;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import utils.FileUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,11 +44,11 @@ public class ArchiverEnvironment extends Environment {
 
     private void create() {
         Map<String, String> res = new FormBuilder(in, out)
-                .addField("Enter filename: ", "name", InputPredicates.isFileName, "Incorrect filename!")
-                .addField("Enter archive type: ", "archType", InputPredicates.isArchiveType, "Incorrect archive type!")
-                .addField("Enter compressor type (press enter if it's unnecessary): ", "compressType", InputPredicates.isCompressorType, "Incorrect compress type!")
-                .addField("Enter save path: ", "path", InputPredicates.isExistedPath, "Path is incorrect or file/directory does not exist!")
-                .addField("Enter file path to add (press enter to end): ", "filePaths", InputPredicates.isExistedPath, "Path is incorrect or file/directory does not exist!", true, "|")
+                .addField(resourceManager.getString("filenameLabel"), "name", InputPredicates.isFileName, resourceManager.getString("filenameError"))
+                .addField(resourceManager.getString("archiveTypeLabel"), "archType", InputPredicates.isArchiveType, resourceManager.getString("archiveTypeError"))
+                .addField(resourceManager.getString("compressionTypeLabel"), "compressType", InputPredicates.isCompressorType, resourceManager.getString("compressTypeError"))
+                .addField(resourceManager.getString("savePathLabel"), "path", InputPredicates.isExistedPath, resourceManager.getString("existedPathError"))
+                .addField(resourceManager.getString("fileToAddLabel"), "filePaths", InputPredicates.isExistedPath, resourceManager.getString("existedPathError"), true, "|")
                 .build()
                 .execute();
 
@@ -61,7 +63,7 @@ public class ArchiverEnvironment extends Environment {
             compressType = getCompressorType(res.get("compressType"));
         }
 
-        Path archivePath = Path.of(res.get("path"), archiveName);
+        Path archivePath = FileUtils.getFreePath(Path.of(res.get("path"), archiveName));
         List<Path> filePaths = convertMultipleStringToPathList(res.get("filePaths"), "\\|");
 
         try {
@@ -76,13 +78,13 @@ public class ArchiverEnvironment extends Environment {
             throw new RuntimeException(e);
         }
 
-        out.println("\nArchive " + archiveName + " was successfully created by the path: " + archivePath + "\n");
+        out.printf("\n" + resourceManager.getString("successCreating") + "\n", archiveName, archivePath);
     }
 
     private void add() {
         Map<String, String> res = new FormBuilder(in, out)
-                .addField("Enter archive path: ", "path", InputPredicates.isCorrectArchivePath, "Path is incorrect or archive does not be supported!")
-                .addField("Enter file path to add (press enter to end): ", "filePaths", InputPredicates.isExistedPath, "Path is incorrect or file/directory does not exist!", true, "|")
+                .addField(resourceManager.getString("archivePathLabel"), "path", InputPredicates.isCorrectArchivePath, resourceManager.getString("archiveSupportError"))
+                .addField(resourceManager.getString("fileToAddLabel"), "filePaths", InputPredicates.isExistedPath, "Path is incorrect or file/directory does not exist!", true, "|")
                 .build()
                 .execute();
 
@@ -96,18 +98,18 @@ public class ArchiverEnvironment extends Environment {
                         .add(archivePath, filePaths);
             } else {
                 getBasicArchiver(pairTypes.getLeft())
-                        .create(archivePath, filePaths);
+                        .add(archivePath, filePaths);
             }
         } catch (IOException | ArchiveException e) {
             throw new RuntimeException(e);
         }
 
-        out.println("\nArchive " + archivePath.getFileName() + " was successfully added the files\n");
+        out.printf("\n" + resourceManager.getString("successAdding") + "\n", archivePath.getFileName());
     }
 
     private void show() {
         Map<String, String> res = new FormBuilder(in, out)
-                .addField("Enter archive path: ", "path", InputPredicates.isCorrectArchivePath, "Path is incorrect or archive does not be supported!")
+                .addField(resourceManager.getString("archivePathLabel"), "path", InputPredicates.isCorrectArchivePath, resourceManager.getString("archiveSupportError"))
                 .build()
                 .execute();
 
@@ -127,7 +129,7 @@ public class ArchiverEnvironment extends Environment {
             throw new RuntimeException(e);
         }
 
-        out.println("\n----- Archive's files (" + archivePath + ") -----");
+        out.printf("\n" + resourceManager.getString("showingListHeader") + "\n", archivePath);
         entities.stream()
                 .map(Entity::name)
                 .forEach(out::println);
@@ -136,8 +138,8 @@ public class ArchiverEnvironment extends Environment {
 
     private void remove() {
         Map<String, String> res = new FormBuilder(in, out)
-                .addField("Enter archive path: ", "path", InputPredicates.isCorrectArchivePath, "Path is incorrect or archive does not be supported!")
-                .addField("Enter entry name (press enter to end): ", "entryNames", InputPredicates.isEntryName, "Entry name is incorrect", true, "|")
+                .addField(resourceManager.getString("archivePathLabel"), "path", InputPredicates.isCorrectArchivePath, resourceManager.getString("archiveSupportError"))
+                .addField(resourceManager.getString("entryToDeleteLabel"), "entryNames", InputPredicates.isEntryName, resourceManager.getString("entryNameError"), true, "|")
                 .build()
                 .execute();
 
@@ -158,7 +160,7 @@ public class ArchiverEnvironment extends Environment {
             throw new RuntimeException(e);
         }
 
-        out.println("\n----- Successfully deleted -----");
+        out.println(resourceManager.getString("deletingListHeader"));
         entities.stream()
                 .map(Entity::name)
                 .forEach(out::println);
@@ -167,8 +169,8 @@ public class ArchiverEnvironment extends Environment {
 
     private void extract() {
         Map<String, String> res = new FormBuilder(in, out)
-                .addField("Enter archive path: ", "archivePath", InputPredicates.isCorrectArchivePath, "Path is incorrect or file/directory does not exist!")
-                .addField("Enter extract path: ", "extractPath", InputPredicates.isExistedDirectory, "Path is incorrect or directory does not exist!")
+                .addField(resourceManager.getString("archivePathLabel"), "archivePath", InputPredicates.isCorrectArchivePath, resourceManager.getString("archiveSupportError"))
+                .addField(resourceManager.getString("extractPathLabel"), "extractPath", InputPredicates.isExistedDirectory, resourceManager.getString("existedDirectoryError"))
                 .build()
                 .execute();
 
@@ -193,7 +195,7 @@ public class ArchiverEnvironment extends Environment {
         ExportVisitor visitor = new ExportVisitor(extractPath);
         visitor.export(entities);
 
-        out.println("\nArchive " + archivePath.getFileName() + " was successfully extracted to " + extractPath + "\n");
+        out.printf("\n" + resourceManager.getString("successExtracting") + "\n", archivePath.getFileName(), extractPath);
     }
 
     private AbstractArchiver getBasicArchiver(ArchiveType archType) {

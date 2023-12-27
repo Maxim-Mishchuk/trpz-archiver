@@ -12,6 +12,7 @@ import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
+import utils.FileUtils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -36,8 +37,9 @@ public class Archiver extends AbstractArchiver {
 
     @Override
     public void create(Path archivePath, List<Path> filePaths) throws IOException, ArchiveException {
+        Path savedPath = FileUtils.getFreePath(archivePath);
         try (
-                BufferedOutputStream bos = new BufferedOutputStream(Files.newOutputStream(archivePath));
+                BufferedOutputStream bos = new BufferedOutputStream(Files.newOutputStream(savedPath));
                 ArchiveOutputStream aos = new ArchiveStreamFactory()
                         .createArchiveOutputStream(archiveType.name(), bos)
         ) {

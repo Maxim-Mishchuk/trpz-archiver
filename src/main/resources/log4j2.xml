@@ -9,8 +9,15 @@
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="${basicLayout}"/>
         </Console>
+        <File name="InfoFile" fileName="logs/fileTransfer/fileTransfer_info.log">
+            <PatternLayout pattern="${basicLayout}"/>
+        </File>
     </Appenders>
     <Loggers>
+        <Logger name="P2PFileTransfer" additivity="false" level="info">
+            <AppenderRef ref="Console" level="info"/>
+            <AppenderRef ref="InfoFile" level="info"/>
+        </Logger>
         <Root level="debug">
             <AppenderRef ref="Console" level="info"/>
         </Root>

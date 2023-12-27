@@ -1,6 +1,5 @@
 package archiver_ui.console.input;
 
-import lombok.Data;
 import lombok.Getter;
 
 import java.io.InputStream;

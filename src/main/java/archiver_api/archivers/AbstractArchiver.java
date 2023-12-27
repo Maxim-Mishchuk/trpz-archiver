@@ -1,6 +1,6 @@
 package archiver_api.archivers;
 
-import org.apache.commons.compress.utils.FileNameUtils;
+import utils.FileUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -21,13 +21,8 @@ public abstract class AbstractArchiver implements IArchiver {
         if (Files.notExists(folderPath))
             Files.createDirectory(folderPath);
 
-        String name = FileNameUtils.getBaseName(archivePath);
-        String extension = FileNameUtils.getExtension(archivePath);
-        Path tempArchivePath = Path.of(TEMP_FOLDER, folder, name + "." + extension);
-
-        for (int i = 1; Files.exists(tempArchivePath); i++) {
-            tempArchivePath = Path.of(TEMP_FOLDER, folder, name + i + "." + extension);
-        }
+        Path tempArchivePath = folderPath.resolve(archivePath.getFileName().toString());
+        tempArchivePath = FileUtils.getFreePath(tempArchivePath);
 
         return Files.createFile(tempArchivePath);
     }

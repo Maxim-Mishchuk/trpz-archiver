@@ -1,5 +1,6 @@
 package fileTransfer;
 
+import archiver_ui.utils.ResourceManager;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,9 +19,11 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Formatter;
 
 public class P2PFileTransfer {
-    private static final Logger logger = LogManager.getLogger();
+    private static final Logger logger = LogManager.getLogger(P2PFileTransfer.class.getSimpleName());
+    protected static final ResourceManager resourceManager = ResourceManager.INSTANCE;
     private static final int DEFAULT_PORT = 44305;
     private final FileReceiver fileReceiver = new FileReceiver("received");
     private final FileSender fileSender = new FileSender();
@@ -51,28 +54,28 @@ public class P2PFileTransfer {
     private record FileReceiver(String receiveDirName) {
 
         public void receive(Socket clientSocket) throws IOException {
-                try (
-                        DataInputStream dis = new DataInputStream(clientSocket.getInputStream())
-                ) {
-                    Path receiveDir = initReceiveDir();
-                    receiveDir = initTodayDir(receiveDir);
+            try (
+                    DataInputStream dis = new DataInputStream(clientSocket.getInputStream())
+            ) {
+                Path receiveDir = initReceiveDir();
+                receiveDir = initTodayDir(receiveDir);
 
-                    String fileName = dis.readUTF();
-                    Path filePath = initReceivedFile(dis, receiveDir, fileName);
-                    FileTime lastModifiedTime = FileTime.fromMillis(dis.readLong());
+                String fileName = dis.readUTF();
+                Path filePath = initReceivedFile(dis, receiveDir, fileName);
+                FileTime lastModifiedTime = FileTime.fromMillis(dis.readLong());
 
-                    long fileSize = dis.readLong();
-                    byte[] buffer = new byte[4096];
-                    try (OutputStream os = Files.newOutputStream(filePath, StandardOpenOption.WRITE)) {
-                        int bytes;
-                        while (fileSize > 0 && (bytes = dis.read(buffer, 0, (int) Math.min(buffer.length, fileSize))) != -1) {
-                            os.write(buffer, 0, bytes);
-                            fileSize -= bytes;
-                        }
+                long fileSize = dis.readLong();
+                byte[] buffer = new byte[4096];
+                try (OutputStream os = Files.newOutputStream(filePath, StandardOpenOption.WRITE)) {
+                    int bytes;
+                    while (fileSize > 0 && (bytes = dis.read(buffer, 0, (int) Math.min(buffer.length, fileSize))) != -1) {
+                        os.write(buffer, 0, bytes);
+                        fileSize -= bytes;
                     }
-                    Files.setAttribute(filePath, "basic:lastModifiedTime", lastModifiedTime, LinkOption.NOFOLLOW_LINKS);
-                    logger.info("Client server successfully saved file " + fileName + ", path: " + filePath.toAbsolutePath());
                 }
+                Files.setAttribute(filePath, "basic:lastModifiedTime", lastModifiedTime, LinkOption.NOFOLLOW_LINKS);
+                logger.info(String.format(resourceManager.getString("serverSaved"), fileName, filePath.toAbsolutePath()));
+            }
         }
 
         private Path initReceiveDir() throws IOException {
@@ -99,11 +102,11 @@ public class P2PFileTransfer {
             return result;
         }
 
-        }
+    }
 
     public Thread start() {
         Thread serverThread = new Thread(() -> {
-            logger.info("Client server has been started");
+            logger.info(resourceManager.getString("serverStarted"));
             while (!Thread.interrupted()) {
                 try {
                     init();
@@ -111,7 +114,7 @@ public class P2PFileTransfer {
                     throw new RuntimeException(e);
                 }
             }
-            logger.info("Client server has been stopped");
+            logger.info(resourceManager.getString("serverStopped"));
         });
         serverThread.start();
         return serverThread;
@@ -119,19 +122,19 @@ public class P2PFileTransfer {
 
     public void init() throws IOException {
         try (ServerSocket serverSocket = new ServerSocket(DEFAULT_PORT)) {
-            logger.info("Client server is waiting for connection");
+            logger.info(resourceManager.getString("serverWaiting"));
             serverSocket.setSoTimeout(15_000);
             try (Socket client = serverSocket.accept()) {
-                logger.info("Client server has got a connection");
+                logger.info(resourceManager.getString("serverConnected"));
                 fileReceiver.receive(client);
             } catch (SocketTimeoutException ex) {
-                logger.info("Client server does not get any connection");
+                logger.info(resourceManager.getString("serverTimeout"));
             }
         }
     }
 
     public void send(String address, Path path) throws IOException {
-        logger.info("Client send a file " + path.getFileName().toString());
+        logger.info(String.format(resourceManager.getString("clientSend"), path.getFileName()));
         fileSender.send(address, path);
     }
 }
