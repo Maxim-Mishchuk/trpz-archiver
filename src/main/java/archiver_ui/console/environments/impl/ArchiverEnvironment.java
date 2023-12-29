@@ -160,7 +160,7 @@ public class ArchiverEnvironment extends Environment {
             throw new RuntimeException(e);
         }
 
-        out.println(resourceManager.getString("deletingListHeader"));
+        out.println("\n" + resourceManager.getString("deletingListHeader"));
         entities.stream()
                 .map(Entity::name)
                 .forEach(out::println);
